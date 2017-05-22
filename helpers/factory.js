@@ -26,8 +26,41 @@ class Factory {
           faker: 'lorem.sentence'
         },
         geo: {
-          type: 'string',
-          faker: 'address.latitude'
+          type: 'object',
+          properties: {
+            city: {
+              type: 'string',
+              faker: 'address.city'
+            },
+            country: {
+              type: 'string',
+              faker: 'address.country'
+            },
+            country_code: {
+              type: 'string',
+              faker: 'address.countryCode'
+            },
+            latitude: {
+              type: 'string',
+              faker: 'address.latitude'
+            },
+            longitude: {
+              type: 'string',
+              faker: 'address.longitude'
+            },
+            state: {
+              type: 'string',
+              faker: 'address.state'
+            },
+            street: {
+              type: 'string',
+              faker: 'address.streetAddress'
+            },
+            zip: {
+              type: 'string',
+              faker: 'address.zipCode'
+            }
+          }
         },
         tags: {
           type: 'array',
@@ -66,7 +99,7 @@ class Factory {
     }
   }
 
-  async did(count) {
+  async did (count) {
     let dids = []
     for (let i = 0; i < count; i++) {
       dids.push(await jsf(this.didTemplate))
