@@ -9,7 +9,7 @@ const Crud = require('../lib/crud')
 const crud = new Crud(db)
 const Factory = require('../helpers/factory')
 const factory = new Factory()
-const Did = require('../lib/did')
+const Didbot = require('../lib/didbot')
 
 test.before('seed test cases', async t => {
   try {
@@ -24,17 +24,17 @@ test.before('seed test cases', async t => {
 })
 
 test.serial('Test all dids are loaded into Did.dids', async t => {
-  let did = new Did(db)
-  await did.getDids() // need to call again to await the dids loaded. Wouldn't need this in production.
+  let didbot = new Didbot(db)
+  await didbot.getDids() // need to call again to await the dids loaded. Wouldn't need this in production.
 
-  t.is(did.dids.docs.length, 4)
+  t.is(didbot.dids.docs.length, 4)
 })
 
 test.serial('Test new did is loaded into Did.dids on did creation', async t => {
-  let did = new Did(db)
-  await did.getDids() // need to call again to await the dids loaded. Wouldn't need this in production.
+  let didbot = new Didbot(db)
+  await didbot.getDids() // need to call again to await the dids loaded. Wouldn't need this in production.
 
-  t.is(did.dids.docs.length, 4)
+  t.is(didbot.dids.docs.length, 4)
 
   let newDid = {
     text: 'this is a test did',
@@ -43,8 +43,8 @@ test.serial('Test new did is loaded into Did.dids on did creation', async t => {
     geo: {}
   }
 
-  await did.createDid(newDid)
-  t.is(did.dids.docs.length, 5)
+  await didbot.createDid(newDid)
+  t.is(didbot.dids.docs.length, 5)
 })
 
 test.after.always('guaranteed cleanup', async t => {
