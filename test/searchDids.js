@@ -29,6 +29,11 @@ test.before('seed test cases', async t => {
     d[2].source = 'mobile'
     d[3].source = 'console'
 
+    d[0].text = 'Here is some text for the first did'
+    d[1].text = 'And here is some text for the second did'
+    d[2].text = 'I am happily creating some sample dids'
+    d[3].text = 'The barn doors are red'
+
     for (let i = 0; i < 4; i++) {
       await crud.createDid(d[i])
     }
@@ -104,6 +109,37 @@ test.serial('Test Crud getDids source filter', async t => {
   t.deepEqual(someDids.docs, [
     allDids.docs[0],
     allDids.docs[1]
+  ])
+})
+
+test.serial('Test Crud getDids full text search filter', async t => {
+  let filters = {}
+
+  let allDids = await crud.getDids(filters)
+  t.is(allDids.docs.length, 4)
+
+  filters.q = 'here text'
+  let someDids = await crud.getDids(filters)
+
+  t.is(someDids.docs.length, 2)
+  t.deepEqual(someDids.docs, [
+    allDids.docs[0],
+    allDids.docs[1]
+  ])
+})
+
+test.serial('Test Crud getDids partial text search filter', async t => {
+  let filters = {}
+
+  let allDids = await crud.getDids(filters)
+  t.is(allDids.docs.length, 4)
+
+  filters.q = 'happily'
+  let someDids = await crud.getDids(filters)
+
+  t.is(someDids.docs.length, 1)
+  t.deepEqual(someDids.docs, [
+    allDids.docs[2]
   ])
 })
 
