@@ -40,7 +40,7 @@ test.serial('Test new did is loaded into Did.dids on did creation', async t => {
     text: 'this is a test did',
     source: 'test',
     tags: ['test'],
-    geo: {}
+    meta: {}
   }
 
   await didbot.createDid(newDid)

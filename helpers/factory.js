@@ -25,7 +25,7 @@ class Factory {
           type: 'string',
           faker: 'lorem.sentence'
         },
-        geo: {
+        meta: {
           type: 'object',
           properties: {
             city: {
@@ -89,7 +89,7 @@ class Factory {
         user: {'enum': ['pupshaw']},
         type: {'enum': ['did']}
       },
-      required: ['_id', 'text', 'geo', 'tags', 'date', 'source', 'type'],
+      required: ['_id', 'text', 'meta', 'tags', 'date', 'source', 'type'],
       definitions: {
         tag: {
           type: 'string',
