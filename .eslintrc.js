@@ -8,6 +8,8 @@ module.exports = {
     rules: {
       "no-unexpected-multiline": "off",
       "padded-blocks": "off",
-      "spaced-comment": "off"
+      "spaced-comment": "off",
+      "no-multi-spaces": "off",
+      "key-spacing": "off"
     }
 };

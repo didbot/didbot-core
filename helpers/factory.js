@@ -1,111 +1,78 @@
 const moment = require('moment')
-const jsf = require('json-schema-faker')
-
-jsf.format('random-date', function (gen, schema) {
-  let lastWeek = moment().subtract(1, 'week').toDate()
-  let date = randomDate(lastWeek, new Date())
-  return date.toJSON()
-})
-
-function randomDate (start, end) {
-  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()))
-}
+const ulid = require('ulid')
+const Did = require('../lib/models/did.js')
+const validate = require('../lib/design')
 
 class Factory {
-  constructor () {
+  constructor (db) {
+    this.db = db
+  }
 
-    this.didTemplate = {
-      type: 'object',
-      properties: {
-        _id: {
-          type: 'string',
-          format: 'random-date'
-        },
-        text: {
-          type: 'string',
-          faker: 'lorem.sentence'
-        },
-        meta: {
-          type: 'object',
-          properties: {
-            city: {
-              type: 'string',
-              faker: 'address.city'
-            },
-            country: {
-              type: 'string',
-              faker: 'address.country'
-            },
-            country_code: {
-              type: 'string',
-              faker: 'address.countryCode'
-            },
-            latitude: {
-              type: 'string',
-              faker: 'address.latitude'
-            },
-            longitude: {
-              type: 'string',
-              faker: 'address.longitude'
-            },
-            state: {
-              type: 'string',
-              faker: 'address.state'
-            },
-            street: {
-              type: 'string',
-              faker: 'address.streetAddress'
-            },
-            zip: {
-              type: 'string',
-              faker: 'address.zipCode'
-            }
-          }
-        },
-        tags: {
-          type: 'array',
-          minItems: 1,
-          maxItems: 3,
-          items: {
-            $ref: '#/definitions/tag'
-          }
-        },
-        date: {
-          type: 'string',
-          format: 'random-date'
-        },
-        source: {
-          type: 'string',
-          chance: {
-            pickone: [
-              [
-                'banana',
-                'apple',
-                'orange'
-              ]
-            ]
-          }
-        },
-        user: {'enum': ['pupshaw']},
-        type: {'enum': ['did']}
-      },
-      required: ['_id', 'text', 'meta', 'tags', 'date', 'source', 'type'],
-      definitions: {
-        tag: {
-          type: 'string',
-          faker: 'company.catchPhrase'
+  /**
+   * Creates did objects given in the count and persists them to the database. Returns a simple array of those
+   * did objects.
+   *
+   * @param count integer
+   * @return array
+   */
+  async dids (count) {
+    try {
+      const model = new Did(this.db)
+      let dids = []
+
+      for (let i = 0; i < count; i++) {
+        const date = moment().subtract(i, 'days')
+
+        let data = {
+          _id:    ulid(date.valueOf()),
+          _rev:   null,
+          type:   'did',
+          user:   ulid(),
+          date:   date.toJSON(),
+          text:   'Did ' + i,
+          source: 'test',
+          tags:   ['test'],
+          meta:   {test: true}
         }
+
+        validate(data, null)
+
+        let result  = await this.db.put(data)
+        let did     = await model.find(result.id)
+        dids.push(did)
       }
+      return dids
+    } catch (err) {
+      console.log(err)
     }
   }
 
-  async did (count) {
-    let dids = []
-    for (let i = 0; i < count; i++) {
-      dids.push(await jsf(this.didTemplate))
-    }
+  async did () {
+    try {
+      const model = new Did(this.db)
+      const date = moment()
 
-    return dids
+      let data = {
+        _id:    ulid(date.valueOf()),
+        _rev:   null,
+        type:   'did',
+        user:   ulid(),
+        date:   date.toJSON(),
+        text:   'Did',
+        source: 'test',
+        tags:   ['test'],
+        meta:   {test: true}
+      }
+
+      validate(data, null)
+
+      let result  = await this.db.put(data)
+      let did     = await model.find(result.id)
+
+      return did
+    } catch (err) {
+      console.log(err)
+    }
   }
 }
 
