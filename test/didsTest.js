@@ -2,6 +2,7 @@ const Initialize = require('../lib/initialize')
 const ulid = require('ulid')
 const test = require('ava')
 const Dids = require('../lib/models/dids.js')
+const User = require('../lib/models/user.js')
 const Factory = require('../helpers/factory')
 
 /*
@@ -89,7 +90,9 @@ test('testGetAll', async t => {
 
 test.beforeEach(async t => {
   // generate a random db
-  t.context.db =  await new Initialize(ulid(), ulid())
+  const user = new User()
+  user.id = ulid()
+  t.context.db =  await new Initialize(user)
   t.context.factory =  await new Factory(t.context.db)
 })
 
