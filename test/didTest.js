@@ -88,15 +88,15 @@ test('testUpdate', async t => {
 
 /*
 |--------------------------------------------------------------------------
-| Delete Tests
+| Destroy Tests
 |--------------------------------------------------------------------------
 |
 |
 */
 
-test('testDelete', async t => {
+test('testDestroy', async t => {
   const did = await t.context.factory.did()
-  const result = await did.delete()
+  const result = await did.destroy()
 
   t.is(true, result.ok)
 })
