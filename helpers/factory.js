@@ -1,5 +1,5 @@
 const moment = require('moment')
-const ulid = require('ulid')
+const ULID = require('ulid')
 const Did = require('../lib/models/did.js')
 const validate = require('../lib/design')
 
@@ -24,10 +24,10 @@ class Factory {
         const date = moment().subtract(i, 'days')
 
         let data = {
-          _id:    ulid(date.valueOf()),
+          _id:    ULID.ulid(date.valueOf()),
           _rev:   null,
           type:   'did',
-          user:   ulid(),
+          user:   ULID.ulid(),
           date:   date.toJSON(),
           text:   'Did ' + i,
           source: 'test',
@@ -53,10 +53,10 @@ class Factory {
       const date = moment()
 
       let data = {
-        _id:    ulid(date.valueOf()),
+        _id:    ULID.ulid(date.valueOf()),
         _rev:   null,
         type:   'did',
-        user:   ulid(),
+        user:   ULID.ulid(),
         date:   date.toJSON(),
         text:   'Did',
         source: 'test',

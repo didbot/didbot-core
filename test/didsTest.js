@@ -1,5 +1,5 @@
 const Initialize = require('../lib/initialize')
-const ulid = require('ulid')
+const ULID = require('ulid')
 const test = require('ava')
 const Dids = require('../lib/models/dids.js')
 const User = require('../lib/models/user.js')
@@ -30,8 +30,21 @@ test('testGet', async t => {
 |
 */
 
-test('testFind', async t => {
-  t.is(1, 1)
+test('testParamsQ', async t => {
+  await t.context.factory.dids(2)
+  const dids = new Dids(t.context.db)
+  let d = await dids.get()
+  t.is(d.data.length, 2)
+
+  d.data[0].setText('Apple')
+  await d.data[0].save()
+  d.data[1].setText('Banana')
+  await d.data[1].save()
+
+  // test case insensitive search for single word
+  d.filters.q = 'ba'
+  d = await dids.get()
+  t.is(d.data.length, 1)
 })
 
 /*
@@ -91,7 +104,7 @@ test('testGetAll', async t => {
 test.beforeEach(async t => {
   // generate a random db
   const user = new User()
-  user.id = ulid()
+  user.id = ULID.ulid()
   t.context.db =  await new Initialize(user)
   t.context.factory =  await new Factory(t.context.db)
 })

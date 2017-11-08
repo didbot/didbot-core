@@ -1,6 +1,6 @@
 const Initialize = require('../lib/initialize')
 const Didbot = require('../lib/didbot')
-const ulid = require('ulid')
+const ULID = require('ulid')
 const test = require('ava')
 const User = require('../lib/models/user.js')
 const Factory = require('../helpers/factory')
@@ -15,14 +15,14 @@ const Factory = require('../helpers/factory')
 
 test('testDids', async t => {
   await t.context.factory.dids(4)
+  await t.context.didbot.login()
 
-  t.context.didbot.login()
   let results = await t.context.didbot.dids.get()
   t.is(results.data.length, 4)
 })
 
 test('testDid', async t => {
-  t.context.didbot.login()
+  await t.context.didbot.login()
   let did = await t.context.didbot.did
   did.setText('test')
   did.setTags(['test'])
@@ -43,7 +43,7 @@ test('testDid', async t => {
 
 test.beforeEach(async t => {
   // generate a random db
-  const userId = ulid()
+  const userId = ULID.ulid()
   const user = new User()
   user.id = userId
   t.context.db =  await new Initialize(user)
