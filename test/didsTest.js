@@ -49,6 +49,38 @@ test('testParamsQ', async t => {
 
 /*
 |--------------------------------------------------------------------------
+| Summary Tests
+|--------------------------------------------------------------------------
+|
+|
+*/
+
+test('testSummary', async t => {
+  let d = await t.context.factory.dids(5)
+  d[0].setMeta({'apples': 1})
+  d[1].setMeta({'apples': 1, 'bananas': 5})
+  d[2].setMeta({'bananas': 2,'oranges': 7})
+  d[3].setMeta({'sale': true})
+  d[4].setMeta({'store': 'Vons'})
+  await d[0].save()
+  await d[1].save()
+  await d[2].save()
+  await d[3].save()
+  await d[4].save()
+
+  const dids = new Dids(t.context.db)
+  let results = await dids.get()
+  t.is(results.data.length, 5)
+  t.is(results.summary.apples.count, 2)
+  t.is(results.summary.apples.sum, 2)
+  t.is(results.summary.bananas.count, 2)
+  t.is(results.summary.bananas.sum, 7)
+  t.is(results.summary.oranges.count, 1)
+  t.is(results.summary.oranges.sum, 7)
+})
+
+/*
+|--------------------------------------------------------------------------
 | Pagination Tests
 |--------------------------------------------------------------------------
 |
