@@ -1,6 +1,6 @@
 import * as moment from 'moment'
 import {ulid} from 'ulid'
-import {Did} from './models/did.ts'
+import {Did} from './models/did'
 import {User} from './models/user'
 
 const validate = require('./helpers/design')
