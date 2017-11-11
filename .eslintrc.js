@@ -5,11 +5,17 @@ module.exports = {
         "standard",
         "promise"
     ],
-    rules: {
-      "no-unexpected-multiline": "off",
-      "padded-blocks": "off",
-      "spaced-comment": "off",
-      "no-multi-spaces": "off",
-      "key-spacing": "off"
+    overrides: [
+    {
+      files: [ "helpers/*.js" ],
+      excludedFiles: ["**/*Test.js", "**/*.ts"],
+      rules: {
+        "no-unexpected-multiline": "off",
+        "padded-blocks": "off",
+        "spaced-comment": "off",
+        "no-multi-spaces": "off",
+        "key-spacing": "off"
+      },
     }
-};
+  ]
+}
