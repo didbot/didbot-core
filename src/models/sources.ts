@@ -1,19 +1,16 @@
+import PouchDB from 'pouchdb'
+
 /**
  * Handles working with a collection of Sources
  */
-class Sources {
-  constructor (db) {
-    /**
-     * @var pouchdb instance
-     */
-    this.db   = db
+export class Sources {
+  /**
+   * @var PouchDB.Database
+   */
+  private db: PouchDB.Database
 
-    /**
-     * Holds the sources
-     *
-     * @var array
-     */
-    this._data = []
+  constructor(db: PouchDB.Database) {
+    this.db   = db
   }
 
   /*
@@ -24,7 +21,7 @@ class Sources {
   |
   */
 
-  get () {
+  public get() {
     return (async () => {
       try {
         return await this.db.query('my_index/sources', {reduce: true, group: true})
@@ -34,5 +31,3 @@ class Sources {
     })()
   }
 }
-
-module.exports = Sources

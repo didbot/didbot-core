@@ -1,19 +1,25 @@
+import PouchDB from 'pouchdb'
+
 /**
  * Handles working with a collection of Tags
  */
-class Tags {
-  constructor (db) {
-    /**
-     * @var pouchdb instance
-     */
-    this.db   = db
+export class Tags {
 
-    /**
-     * Holds the tags
-     *
-     * @var array
-     */
-    this._data = []
+  /**
+   *
+   */
+  private db: PouchDB.Database
+
+  /**
+   *
+   */
+  private data: string[]
+
+  /**
+   *
+   */
+  constructor(db: PouchDB.Database) {
+    this.db   = db
   }
 
   /*
@@ -24,7 +30,7 @@ class Tags {
   |
   */
 
-  get () {
+  public get(): Promise<PouchDB.Query.Response<{}>> {
     return (async () => {
       try {
         return await this.db.query('my_index/tags', {reduce: true, group: true})
@@ -34,5 +40,3 @@ class Tags {
     })()
   }
 }
-
-module.exports = Tags
