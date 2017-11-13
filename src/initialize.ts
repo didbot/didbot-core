@@ -1,7 +1,7 @@
 import Axios from 'axios'
 
-import PouchDB from 'pouchdb'
-import PouchDBFind from 'pouchdb-find'
+import * as PouchDB from 'pouchdb'
+import * as PouchDBFind from 'pouchdb-find'
 import {UserData} from './models/userData'
 
 PouchDB.plugin(PouchDBFind)

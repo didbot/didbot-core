@@ -1,6 +1,7 @@
 import {Did} from './did'
 import {Filter} from './filter'
 import {Page} from './page'
+import {Selector} from './selector'
 import {User} from './user'
 
 /**
@@ -50,14 +51,7 @@ export class Dids {
      */
     private params: {
         limit: number | undefined,
-        selector: {
-            _id: any,
-            date: any,
-            source: any,
-            tags: object,
-            text: object,
-            type: string
-        },
+        selector: Selector,
         sort: Array<{}>,
     }
 
@@ -75,15 +69,8 @@ export class Dids {
         this.requestedAll = false
         this.requestedMore = false
         this.params = {
-            limit:      0,
-            selector: {
-                _id:    {},
-                date:   {},
-                source: {},
-                tags:   {},
-                text:   {},
-                type:   'did',
-            },
+            limit: undefined,
+            selector: new Selector(),
             sort: [{_id: 'desc'}]
         }
     }
@@ -102,8 +89,9 @@ export class Dids {
     public async get(): Promise<Dids> {
         try {
 
-            // hydrate the selector
-            await this._setSelector()
+            // create a new instance of the selector specific to this search and hydrate it
+            this.params.selector = new Selector()
+            await this.params.selector.set(this.filter, this.db, this.pagination, this.requestedMore)
 
             // determine whether all dids have been requested
             if (this.requestedAll) {
@@ -235,45 +223,6 @@ export class Dids {
         return items
     }
 
-    public async _setSelector() {
-        try {
-
-            const s = this.params.selector
-
-            if (this._isMultipleWordQuery(this.filter.q)) {
-                // get ids for the full text search match
-                const ids = await this._getDidsUsingFullTextSearch(this.filter.q)
-
-                s._id.$in = ids
-
-            } else {
-
-                // otherwise just do a case insensitive wildcard search against the text
-                const regexp = new RegExp(this.filter.q, 'i')
-                s.text = {
-                    $regex: regexp
-                }
-
-            }
-
-            // set from and to
-            if (this.filter.from) { s.date.$gte = this.filter.from }
-            if (this.filter.to) { s.date.$lte = this.filter.to }
-
-            // set tag and source
-            if (this.filter.tag) { s.tags = {$elemMatch: {$eq: this.filter.tag}} }
-            if (this.filter.source) { s.source = this.filter.source }
-
-            // Using lte here because we want to get limit + 1 results back so we know if there are more pages.
-            if (this.requestedMore) {
-                s._id.$lte   = this.pagination.next
-            }
-
-        } catch (err) {
-            throw (err)
-        }
-    }
-
     /*
     |--------------------------------------------------------------------------
     | Public Methods
@@ -363,44 +312,6 @@ export class Dids {
         }))
 
         return sum
-    }
-
-    /**
-     * Determines whether the query contains more then one word. If so full text search will be used.
-     * @return boolean
-     */
-    private _isMultipleWordQuery(query: string) {
-        if (query && /\s/g.test(query)) {
-            return true
-        }
-
-        return false
-    }
-
-    /**
-     * Performs a full text search for the given q. Returns an array of did ids.
-     * @return array
-     */
-    private _getDidsUsingFullTextSearch(q: string) {
-        return (async () => {
-            try {
-
-                const qDocs = await this.db.search({
-                    fields: ['text'],
-                    query: q
-                })
-
-                const ids = qDocs.rows.map((row: any) => {
-                    return row.id
-                })
-
-                return ids
-
-            } catch (err) {
-                throw (err)
-            }
-
-        })()
     }
 
 }

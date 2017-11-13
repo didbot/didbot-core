@@ -32,20 +32,32 @@ test('testGet', async (t) => {
 */
 
 test('testParamsQ', async (t) => {
-    await t.context.factory.dids(2)
+    await t.context.factory.dids(3)
     const dids = new Dids(t.context.user)
     let d = await dids.get()
-    t.is(d.data.length, 2)
+    t.is(d.data.length, 3)
 
     d.data[0].setText('Apple')
     await d.data[0].save()
     d.data[1].setText('Banana')
     await d.data[1].save()
+    d.data[2].setText('Oranges are a delicious fruit')
+    await d.data[2].save()
 
-    // test case insensitive search for single word
+    // test case insensitive partial search for single word
     d.filter.q = 'ba'
+    await dids.get()
+    t.is(d.data.length, 1)
+
+    // test full text search when multiple words
+    d.filter.q = 'orange fruit'
     d = await dids.get()
     t.is(d.data.length, 1)
+
+    // test full text search must match all words
+    d.filter.q = 'blue fruit'
+    d = await dids.get()
+    t.is(d.data.length, 0)
 })
 
 /*
