@@ -1,17 +1,12 @@
 import Axios from 'axios'
-
-import * as PouchDB from 'pouchdb'
-import * as PouchDBFind from 'pouchdb-find'
+import {PouchFactoryNode} from './helpers/pouchFactoryNode'
+import {PouchFactoryWebpack} from './helpers/pouchFactoryWebpack'
 import {UserData} from './models/userData'
-
-PouchDB.plugin(PouchDBFind)
-PouchDB.plugin(require('pouchdb-quick-search'))
-PouchDB.plugin(require('pouchdb-authentication'))
 
 export class Initialize {
     public open(userId: string): PouchDB.Database {
         // todo: is db/ ok to use here?
-        const db = new PouchDB('db/' + userId)
+        const db = (process.env.RUNTIME === 'webpack') ? PouchFactoryWebpack.make(userId) : PouchFactoryNode.make(userId)
 
         // create quick-search index
         db.search({

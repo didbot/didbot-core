@@ -1,5 +1,5 @@
 {
-  "name": "didbot-node",
+  "name": "didbot-core",
   "description": "",
   "version": "0.0.2",
   "main": "./src/index.ts",
