@@ -21,11 +21,10 @@ test('testGettersAndSetters', async (t) => {
   did.setText('test')
   did.setTags('test')
   did.setMeta('test')
-  did.setSource('test')
 
   t.is(did.getTags(), 'test')
   t.is(did.getMeta(), 'test')
-  t.is(did.getSource(), 'test')
+  t.is(did.getText(), 'test')
 })
 
 /*
@@ -63,10 +62,9 @@ test('testSave', async (t) => {
     did.setText('test')
     did.setTags(['test'])
     did.setMeta({test: true})
-    did.setSource('test')
 
     const result = await did.save()
-    t.is(result.getSource(), 'test')
+    t.is(result.getText(), 'test')
 
     const raw = await t.context.db.get(result.id)
 
@@ -128,6 +126,7 @@ test.beforeEach(async (t) => {
         ulid(),
         'test@test.com',
         'Testy McTesty',
+        'SOME_SOURCE',
         'SOME_TOKEN'
     )
     const user = await new User()

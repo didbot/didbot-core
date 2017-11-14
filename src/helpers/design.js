@@ -1,6 +1,5 @@
 function validate (newDoc, oldDoc) {
   if (newDoc._deleted) {
-
     // return if this doc was deleted before it was synced
     if (oldDoc === null) return
 
@@ -10,18 +9,18 @@ function validate (newDoc, oldDoc) {
   }
 
   /* --------------------------------------------------------------------------
-   | Validate the size of the entire newDoc object is something sane
-   |--------------------------------------------------------------------------*/
+  | Validate the size of the entire newDoc object is something sane
+  |-------------------------------------------------------------------------- */
   if (JSON.stringify(newDoc).length > 5000) {
-    throwError({forbidden: 'The did ' + newDoc._id + ' is too large'})
+    throw new Error('The did ' + newDoc._id + ' is too large')
   }
 
   /* --------------------------------------------------------------------------
-   | Require the following fields
-   |--------------------------------------------------------------------------*/
+  | Require the following fields
+  |-------------------------------------------------------------------------- */
   function require (field, message) {
     message = message || 'Document must have a ' + field
-    if (!newDoc[field]) throwError({forbidden: message})
+    if (!newDoc[field]) throw new Error(message)
   }
 
   require('_id')
@@ -32,24 +31,38 @@ function validate (newDoc, oldDoc) {
   require('source')
   require('date')
 
-  /*--------------------------------------------------------------------------
- | Validate uuid fields are ulid
- |--------------------------------------------------------------------------*/
+  /* --------------------------------------------------------------------------
+  | Validate uuid fields are ulid
+  |-------------------------------------------------------------------------- */
   function isUlid (field) {
     let message = field + ' must be a ULID'
     let regex = /^[ABCDEFGHJKMNPQRSTVWXYZ0-9]{26}$/i
 
     if (!regex.test(newDoc[field])) {
-      throwError({forbidden: message})
+      throw new Error(message)
     }
   }
 
   isUlid('_id')
   isUlid('user')
 
-  /*--------------------------------------------------------------------------
-   | Validate the user property matches the logged in user
-   |--------------------------------------------------------------------------*/
+  /* --------------------------------------------------------------------------
+  | Validate date fields are ISO-8601
+  |-------------------------------------------------------------------------- */
+  function isDate (field) {
+    let message = field + ' must be a ISO-8601 date string'
+    let regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/i
+
+    if (!regex.test(newDoc[field])) {
+      throw new Error(message)
+    }
+  }
+
+  isDate('date')
+
+  /* --------------------------------------------------------------------------
+  | Validate the user property matches the logged in user
+  |-------------------------------------------------------------------------- */
   if (oldDoc === null) {
     // The 'creator' property must match the user creating the document:
     requireUser(newDoc.user)
@@ -59,12 +72,12 @@ function validate (newDoc, oldDoc) {
     requireUser(oldDoc.user)
   }
 
-  /*--------------------------------------------------------------------------
+  /* --------------------------------------------------------------------------
    | Leave the following fields unchanged
-   |--------------------------------------------------------------------------*/
+   |-------------------------------------------------------------------------- */
   function unchanged (field) {
     if (oldDoc && JSON.stringify(oldDoc[field]) !== JSON.stringify(newDoc[field])) {
-      throwError({forbidden: 'Field can\'t be changed: ' + field})
+      throw new Error('Field can\'t be changed: ' + field)
     }
   }
 
@@ -74,34 +87,45 @@ function validate (newDoc, oldDoc) {
   unchanged('source')
   unchanged('date')
 
-  /*--------------------------------------------------------------------------
-   | Require the following fields be strings that are less then 250 characters
-   |--------------------------------------------------------------------------*/
+  /* --------------------------------------------------------------------------
+  | Require the following fields be strings that are less then 250 characters
+  |-------------------------------------------------------------------------- */
   function isString (field) {
     if (typeof newDoc[field] !== 'string') {
-      throwError({forbidden: field + ' must be a string'})
+      throw new Error(field + ' must be a string')
     }
 
     if (newDoc[field].length > 250) {
-      throwError({forbidden: field + ' cannot be longer then 250 characters'})
+      throw new Error(field + ' cannot be longer then 250 characters')
     }
   }
 
+  isString('_id')
   isString('text')
   isString('user')
   isString('type')
   isString('source')
   isString('date')
 
-  /*--------------------------------------------------------------------------
-   | Error if any other fields are present
-   |--------------------------------------------------------------------------*/
+  /* --------------------------------------------------------------------------
+  | Validate _rev
+  |-------------------------------------------------------------------------- */
+
+  // 1-93740efcc0c94dc28cc31e78a145b101
+  if (newDoc._rev) {
+    isString('_rev')
+    unchanged('_rev')
+  }
+
+  /* --------------------------------------------------------------------------
+  | Error if any other fields are present
+  |-------------------------------------------------------------------------- */
 
   Object.keys(newDoc).forEach(function (key, i, keys) {
     if (
       key !== '_id' &&
       key !== '_rev' &&
-      key !== '_revisions' &&
+      // key !== '_revisions' &&
       key !== 'type' &&
       key !== 'text' &&
       key !== 'tags' &&
@@ -110,73 +134,73 @@ function validate (newDoc, oldDoc) {
       key !== 'meta' &&
       key !== 'date'
     ) {
-      throwError({forbidden: 'only _id, type, text, tags, source, meta, user, and date are permitted'})
+      throw new Error('only _id, _rev, type, text, tags, source, meta, user, and date are permitted')
     }
   })
 
   // We only allow did docs for now
   if ((oldDoc && oldDoc.type !== 'did') || newDoc.type !== 'did') {
-    throwError({forbidden: 'doc.type must equal did'})
+    throw new Error('doc.type must equal did')
   }
 
-  /*--------------------------------------------------------------------------
-   | Tags Validation
-   |--------------------------------------------------------------------------*/
+  /* --------------------------------------------------------------------------
+  | Tags Validation
+  |-------------------------------------------------------------------------- */
 
   // tags must be an array
   if (!Array.isArray(newDoc.tags)) {
-    throwError({forbidden: 'doc.tags must be an array'})
+    throw new Error('doc.tags must be an array')
   }
 
   for (let tag of newDoc.tags) {
     // tags must be strings
     if (typeof tag !== 'string') {
-      throwError({forbidden: 'all doc.tags must be a string'})
+      throw new Error('all doc.tags must be a string')
     }
 
     // less then 50 cahracters
-    if (tag.length > 50) {
-      throwError({forbidden: 'all doc.tags must be no longer then 50 characters'})
+    if (tag.length > 20) {
+      throw new Error('all doc.tags must be no longer then 20 characters')
+    }
+
+    let regex = /^[a-z0-9-]*$/i
+    if (!regex.test(tag)) {
+      throw new Error('all doc.tags must consist of [a-z0-9-]')
     }
   }
 
-  /*--------------------------------------------------------------------------
-   | Meta Object Validation
-   |--------------------------------------------------------------------------*/
+  /* --------------------------------------------------------------------------
+  | Meta Object Validation
+  |-------------------------------------------------------------------------- */
 
   // meta must be an object
   if (typeof newDoc.meta !== 'object') {
-    throwError({forbidden: 'doc.meta must be an object'})
+    throw new Error('doc.meta must be an object')
   }
 
   if (newDoc.meta.constructor === Array) {
-    throwError({forbidden: 'doc.meta must be an object'})
+    throw new Error('doc.meta must be an object')
   }
 
   // meta cannot have more then 5 properties
   if (Object.keys(newDoc.meta).length > 5) {
-    throwError({forbidden: 'doc.meta cannot have more then 5 properties'})
+    throw new Error('doc.meta cannot have more then 5 properties')
   }
 
   Object.keys(newDoc.meta).forEach(function (key) {
     var val = newDoc.meta[key]
     if (typeof val !== 'number' && typeof val !== 'string' && typeof val !== 'boolean') {
-      throwError({forbidden: 'doc.meta must be a number, string, or boolean'})
+      throw new Error('doc.meta properties must be a number, string, or boolean')
     }
 
     if (val.length > 150) {
-      throwError({forbidden: 'doc.meta properties cannot be longer then 150 characters'})
+      throw new Error('doc.meta properties cannot be longer then 150 characters')
     }
 
     if (key.length > 50) {
-      throwError({forbidden: 'doc.meta keys cannot be longer then 50 characters'})
+      throw new Error('doc.meta keys cannot be longer then 50 characters')
     }
   })
-
-  // using since eslint doesn't like throw({forbidden: message})
-  function throwError (message) {
-    throw message
-  }
 }
 module.exports = validate
 

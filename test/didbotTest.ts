@@ -25,10 +25,9 @@ test('testDid', async (t) => {
     did.setText('test')
     did.setTags(['test'])
     did.setMeta({test: true})
-    did.setSource('test')
 
     const result = await did.save()
-    t.is(result.getSource(), 'test')
+    t.is(result.getSource(), 'SOME_SOURCE')
 })
 
 /*
@@ -45,6 +44,7 @@ test.beforeEach(async (t) => {
         ulid(),
         'test@test.com',
         'Testy McTesty',
+        'SOME_SOURCE',
         'SOME_TOKEN'
     )
 

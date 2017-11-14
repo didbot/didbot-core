@@ -33,7 +33,7 @@ export class Did {
             _rev: '',
             date: '',
             meta: {},
-            source: '',
+            source: user.data.source,
             tags: [],
             text: '',
             type: 'did',
@@ -141,13 +141,6 @@ export class Did {
         this.data.meta = meta
     }
 
-    /**
-     * @param source string
-     */
-    public setSource(source: string) {
-        this.data.source = source
-    }
-
     /*
     |--------------------------------------------------------------------------
     | CRUD Methods
@@ -221,6 +214,7 @@ export class Did {
         this.data._id = ULID.ulid()
         this.data.date = new Date().toJSON()
         this.data.user = this.user.data.id
+        this.data.source = this.user.data.source
         this.data.type = 'did'
         validate(this.data, null)
     }
@@ -238,20 +232,20 @@ export class Did {
     }
 
     /**
-     * Hydrates a did from the given object
+     * Hydrates the model from the raw database document.
      */
-    public hydrate(input: any) {
+    private hydrate(input: any) {
         this.id = input._id
         this.data._id  = input._id
         this.data._rev = input._rev
         this.data.date = moment(input.date)
         this.data.user = input.user
+        this.data.source = input.source
         this.data.type = input.type
 
         this.setText(input.text)
         this.setTags(input.tags)
         this.setMeta(input.meta)
-        this.setSource(input.source)
     }
 
 }

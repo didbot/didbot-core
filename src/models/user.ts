@@ -15,7 +15,7 @@ export class User {
         return this.db
     }
 
-    public async login(email: string, password: string) {
+    public async login(email: string, password: string, source: string) {
         try {
             const server = process.env.AUTH_SERVER
             const response = await Axios.post(server + '/jwt', {
@@ -27,6 +27,7 @@ export class User {
                 // scope: ''
             })
 
+            this.data.source = source
             this.data.token = response.data.token
             await this.getUserInfo()
         } catch (err) {

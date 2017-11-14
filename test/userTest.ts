@@ -35,6 +35,7 @@ test.beforeEach(async (t) => {
         ulid(),
         'test@test.com',
         'Testy McTesty',
+        'SOME_SOURCE',
         'SOME_TOKEN'
     )
 

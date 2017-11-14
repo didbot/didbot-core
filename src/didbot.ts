@@ -18,9 +18,9 @@ export class Didbot {
         this.user = new User()
     }
 
-    public async login(email: string, password: string): Promise <void> {
+    public async login(email: string, password: string, source: string): Promise <void> {
         try {
-            await this.user.login(email, password)
+            await this.user.login(email, password, source)
             await this.start()
         } catch (err) {
             this.user.authenticated = false
