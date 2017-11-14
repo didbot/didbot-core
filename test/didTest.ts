@@ -6,6 +6,8 @@ import {Did} from '../src/models/did'
 import {User} from '../src/models/user'
 import {UserData} from '../src/models/userData'
 
+const moment = require('moment')
+
 /*
 |--------------------------------------------------------------------------
 | Getter, Setter, & Hydrator Tests
@@ -57,14 +59,24 @@ test('testFindThrowsErrorIfNotFound', async (t) => {
 */
 
 test('testSave', async (t) => {
-  const did = await t.context.factory.did()
-  did.setText('test')
-  did.setTags(['test'])
-  did.setMeta({test: true})
-  did.setSource('test')
+    const did = await t.context.factory.did()
+    did.setText('test')
+    did.setTags(['test'])
+    did.setMeta({test: true})
+    did.setSource('test')
 
-  const result = await did.save()
-  t.is(result.getSource(), 'test')
+    const result = await did.save()
+    t.is(result.getSource(), 'test')
+
+    const raw = await t.context.db.get(result.id)
+
+    // validate date is in this format 2017-11-13T16:03:11.989Z
+    t.regex(raw.date, new RegExp('^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{3}Z$', 'g'))
+
+    // validate date is within 5 seconds of now
+    const now = moment()
+    const date = moment(raw.date)
+    t.truthy(now.diff(date) < 5000)
 })
 
 /*

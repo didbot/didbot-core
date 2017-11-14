@@ -1,7 +1,12 @@
+import {UserData} from "./userData"
+
 const ULID = require('ulid')
 const validate = require('../helpers/design')
-import * as Moment from 'moment'
+import { Moment } from 'moment'
 import {User} from './user'
+
+// TODO: can we fix this? https://stackoverflow.com/a/45584936
+const moment = require('moment')
 
 export class Did {
 
@@ -47,63 +52,63 @@ export class Did {
     /**
      * @return object
      */
-    public getData() {
+    public getData(): any {
         return this.data
     }
 
     /**
      * @return string
      */
-    public getType() {
+    public getType(): string {
         return this.data.type
     }
 
     /**
      * @return ulid
      */
-    public getId() {
+    public getId(): string {
         return this.data._id
     }
 
     /**
-     * @return moment object
+     * @return Moment object
      */
-    public getDate() {
+    public getDate(): Moment {
         return this.data.date
     }
 
     /**
      * @return string
      */
-    public getText() {
+    public getText(): string {
         return this.data.text
     }
 
     /**
      * @return array
      */
-    public getTags() {
+    public getTags(): string[] {
         return this.data.tags
     }
 
     /**
      * @return ulid
      */
-    public getUser() {
+    public getUser(): string {
         return this.data.user
     }
 
     /**
      * @return array
      */
-    public getMeta() {
+    public getMeta(): any {
         return this.data.meta
     }
 
     /**
      * @return string
      */
-    public getSource() {
+    public getSource(): string {
         return this.data.source
     }
 
@@ -130,14 +135,14 @@ export class Did {
     }
 
     /**
-     * @param meta array
+     * @param meta object
      */
     public setMeta(meta: object) {
         this.data.meta = meta
     }
 
     /**
-     * @param string array
+     * @param source string
      */
     public setSource(source: string) {
         this.data.source = source
@@ -154,44 +159,40 @@ export class Did {
     /**
      * Returns a single did by id
      */
-    public find(id: string): Promise<Did> {
-        return (async () => {
-            try {
+    public async  find(id: string): Promise<Did> {
+        try {
 
-                const result = await this.db.get(id)
+            const result = await this.db.get(id)
 
-                // return a new instance of self
-                const did = new Did(this.user)
-                did.hydrate(result)
-                return did
+            // return a new instance of self
+            const did = new Did(this.user)
+            did.hydrate(result)
+            return did
 
-            } catch (err) {
-                throw (err)
-            }
-        })()
+        } catch (err) {
+            throw (err)
+        }
     }
 
     /**
      * Saves or updates a did. Note that the following properties cannot be modified
      * once set: id, user, type, source, date
      */
-    public save(): Promise<Did> {
-        return (async () => {
-            try {
+    public async save(): Promise<Did> {
+        try {
 
-                if (this.data._rev) {
-                    await this._prepForUpdate()
-                } else {
-                    this._prepForInsert()
-                }
-
-                const result = await this.db.put(this.data)
-                return this.find(result.id)
-
-            } catch (err) {
-                throw (err)
+            if (this.data._rev) {
+                await this.prepForUpdate()
+            } else {
+                this.prepForInsert()
             }
-        })()
+
+            const result = await this.db.put(this.data)
+            return this.find(result.id)
+
+        } catch (err) {
+            throw (err)
+        }
     }
 
     /**
@@ -216,7 +217,7 @@ export class Did {
     /**
      * Prepare the model for an insert
      */
-    public _prepForInsert() {
+    private prepForInsert() {
         this.data._id = ULID.ulid()
         this.data.date = new Date().toJSON()
         this.data.user = this.user.data.id
@@ -227,7 +228,7 @@ export class Did {
     /**
      * Prepare the model for an update
      */
-    public async _prepForUpdate() {
+    private async prepForUpdate() {
         const oldDid = await this.find(this.data._id)
         this.data.user   = oldDid.data.user
         this.data.type   = oldDid.data.type
@@ -243,7 +244,7 @@ export class Did {
         this.id = input._id
         this.data._id  = input._id
         this.data._rev = input._rev
-        this.data.date = Moment(input.date)
+        this.data.date = moment(input.date)
         this.data.user = input.user
         this.data.type = input.type
 

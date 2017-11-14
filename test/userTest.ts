@@ -3,7 +3,7 @@ import {ulid} from 'ulid'
 import {User} from '../src/models/user'
 import {UserData} from '../src/models/userData'
 
-test.serial('Test get access token', async (t) => {
+test('Test get access token', async (t) => {
     await t.context.user.login('a@a.com', '123')
 
     t.truthy(t.context.user.data.id)

@@ -6,6 +6,8 @@ import {Dids} from '../src/models/dids'
 import {User} from '../src/models/user'
 import {UserData} from '../src/models/userData'
 
+const moment = require('moment')
+
 /*
 |--------------------------------------------------------------------------
 | Get Tests
@@ -31,7 +33,7 @@ test('testGet', async (t) => {
 |
 */
 
-test('testParamsQ', async (t) => {
+test('testTextFilter', async (t) => {
     await t.context.factory.dids(3)
     const dids = new Dids(t.context.user)
     let d = await dids.get()
@@ -58,6 +60,51 @@ test('testParamsQ', async (t) => {
     d.filter.q = 'blue fruit'
     d = await dids.get()
     t.is(d.data.length, 0)
+})
+
+test('testTagFilter', async (t) => {
+    await t.context.factory.dids(3)
+    const d = new Dids(t.context.user)
+    await d.get()
+    t.is(d.data.length, 3)
+
+    // need to set dates directly on the db
+    d.data[0].setTags(['apple'])
+    d.data[1].setTags(['banana', 'apple'])
+    d.data[2].setTags(['orange', 'banana'])
+    await d.data[0].save()
+    await d.data[1].save()
+    await d.data[2].save()
+
+    d.filter.tag = 'banana'
+    await d.get()
+    t.is(d.data.length, 2)
+})
+
+test('testDateFilter', async (t) => {
+    await t.context.factory.dids(3)
+    const d = new Dids(t.context.user)
+    await d.get()
+    t.is(d.data.length, 3)
+
+    // need to set dates directly on the db
+    const d1 = await t.context.db.get(d.data[0].id)
+    const d2 = await t.context.db.get(d.data[1].id)
+    const d3 = await t.context.db.get(d.data[2].id)
+
+    d1.date = moment('2017-12-25').toJSON()
+    d2.date = moment('2017-12-24').toJSON()
+    d3.date = moment('2017-12-23').toJSON()
+
+    await t.context.db.put(d1)
+    await t.context.db.put(d2)
+    await t.context.db.put(d3)
+
+    d.filter.from = '2017-12-23'
+    d.filter.to = '2017-12-24'
+    await d.get()
+    // expect 2 results since 'from' is start-of-day and 'to' is end-of-day.
+    t.is(d.data.length, 2)
 })
 
 /*
