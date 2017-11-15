@@ -1,7 +1,6 @@
-import {UserData} from "./userData"
-
 const ULID = require('ulid')
 const validate = require('../helpers/design')
+const getSlug = require('speakingurl')
 import { Moment } from 'moment'
 import {User} from './user'
 
@@ -131,7 +130,11 @@ export class Did {
      * @param tags array
      */
     public setTags(tags: string[]) {
-        this.data.tags = tags
+        if (!Array.isArray(tags)) { throw new Error('Tags must be an array')}
+
+        this.data.tags = tags.map((tag) =>
+            getSlug(tag, { truncate: 32 })
+        )
     }
 
     /**
@@ -214,7 +217,7 @@ export class Did {
         this.data._id = ULID.ulid()
         this.data.date = new Date().toJSON()
         this.data.user = this.user.data.id
-        this.data.source = this.user.data.source
+        this.data.source = getSlug(this.user.data.source, { truncate: 32 })
         this.data.type = 'did'
         validate(this.data, null)
     }

@@ -19,10 +19,10 @@ const moment = require('moment')
 test('testGettersAndSetters', async (t) => {
   const did = await t.context.factory.did()
   did.setText('test')
-  did.setTags('test')
+  did.setTags(['test', 'Schöner Titel läßt grüßen!? Bel été !'])
   did.setMeta('test')
-
-  t.is(did.getTags(), 'test')
+  t.is(did.getTags()[0], 'test')
+  t.is(did.getTags()[1], 'schoener-titel-laesst-gruessen')
   t.is(did.getMeta(), 'test')
   t.is(did.getText(), 'test')
 })
@@ -58,17 +58,18 @@ test('testFindThrowsErrorIfNotFound', async (t) => {
 */
 
 test('testSave', async (t) => {
-    const did = await t.context.factory.did()
+    const did = new Did(t.context.user)
     did.setText('test')
     did.setTags(['test'])
     did.setMeta({test: true})
 
     const result = await did.save()
     t.is(result.getText(), 'test')
-
-    const raw = await t.context.db.get(result.id)
+    t.is(result.getUser(), t.context.user.data.id)
+    t.is(result.getSource(), 'schoener-titel-laesst-gruessen')
 
     // validate date is in this format 2017-11-13T16:03:11.989Z
+    const raw = await t.context.db.get(result.id)
     t.regex(raw.date, new RegExp('^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{3}Z$', 'g'))
 
     // validate date is within 5 seconds of now
@@ -126,7 +127,7 @@ test.beforeEach(async (t) => {
         ulid(),
         'test@test.com',
         'Testy McTesty',
-        'SOME_SOURCE',
+        'Schöner Titel läßt grüßen!? Bel été !',
         'SOME_TOKEN'
     )
     const user = await new User()

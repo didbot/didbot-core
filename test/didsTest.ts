@@ -79,6 +79,14 @@ test('testTagFilter', async (t) => {
     d.filter.tag = 'banana'
     await d.get()
     t.is(d.data.length, 2)
+
+    d.filter.tag = 'orange'
+    await d.get()
+    t.is(d.data.length, 1)
+
+    d.filter.tag = null
+    await d.get()
+    t.is(d.data.length, 3)
 })
 
 test('testDateFilter', async (t) => {
@@ -103,11 +111,24 @@ test('testDateFilter', async (t) => {
     d.filter.from = '2017-12-23'
     d.filter.to = '2017-12-24'
     await d.get()
-    // expect 2 results since 'from' is start-of-day and 'to' is end-of-day.
-    t.is(d.data.length, 2)
+    t.is(d.data.length, 2) // expect 2 results since 'from' is start-of-day and 'to' is end-of-day.
+
+    d.filter.from = '2017-12-23'
+    d.filter.to = '2017-12-23'
+    await d.get()
+    t.is(d.data.length, 1)
+
+    d.filter.to = null
+    await d.get()
+    t.is(d.data.length, 3) // expect 3 results since 'from' is still 2017-12-23.
+
+    d.filter.from = null
+    d.filter.to = null
+    await d.get()
+    t.is(d.data.length, 3)
 })
 
-test('testDateFilter', async (t) => {
+test('testSourceFilter', async (t) => {
     await t.context.factory.dids(3)
     const d = new Dids(t.context.user)
     await d.get()
@@ -118,19 +139,25 @@ test('testDateFilter', async (t) => {
     const d2 = await t.context.db.get(d.data[1].id)
     const d3 = await t.context.db.get(d.data[2].id)
 
-    d1.date = moment('2017-12-25').toJSON()
-    d2.date = moment('2017-12-24').toJSON()
-    d3.date = moment('2017-12-23').toJSON()
+    d1.source = 'source-a'
+    d2.source = 'source-a'
+    d3.source = 'source-b'
 
     await t.context.db.put(d1)
     await t.context.db.put(d2)
     await t.context.db.put(d3)
 
-    d.filter.from = '2017-12-23'
-    d.filter.to = '2017-12-24'
+    d.filter.source = 'source-a'
     await d.get()
-    // expect 2 results since 'from' is start-of-day and 'to' is end-of-day.
     t.is(d.data.length, 2)
+
+    d.filter.source = 'source-b'
+    await d.get()
+    t.is(d.data.length, 1)
+
+    d.filter.source = null
+    await d.get()
+    t.is(d.data.length, 3)
 })
 
 /*
@@ -225,7 +252,7 @@ test.beforeEach(async (t) => {
         ulid(),
         'test@test.com',
         'Testy McTesty',
-        'SOME_SOURCE',
+        'some-source',
         'SOME_TOKEN'
     )
     const user = await new User()

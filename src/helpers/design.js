@@ -108,6 +108,22 @@ function validate (newDoc, oldDoc) {
   isString('date')
 
   /* --------------------------------------------------------------------------
+  | Require the following fields be slug-ified and less then 32 characters
+  |-------------------------------------------------------------------------- */
+  function isSlug (field) {
+    const regex = /^[a-z0-9-]*$/i
+    if (!regex.test(newDoc[field])) {
+      throw new Error(field + ' must consist of [a-z0-9-]')
+    }
+
+    if (newDoc[field].length > 32) {
+      throw new Error(field + ' cannot be longer then 32 characters')
+    }
+  }
+
+  isSlug('source')
+
+  /* --------------------------------------------------------------------------
   | Validate _rev
   |-------------------------------------------------------------------------- */
 
@@ -158,9 +174,9 @@ function validate (newDoc, oldDoc) {
       throw new Error('all doc.tags must be a string')
     }
 
-    // less then 50 cahracters
-    if (tag.length > 20) {
-      throw new Error('all doc.tags must be no longer then 20 characters')
+    // less then 32 cahracters
+    if (tag.length > 32) {
+      throw new Error('all doc.tags must be no longer then 32 characters')
     }
 
     let regex = /^[a-z0-9-]*$/i
@@ -197,8 +213,8 @@ function validate (newDoc, oldDoc) {
       throw new Error('doc.meta properties cannot be longer then 150 characters')
     }
 
-    if (key.length > 50) {
-      throw new Error('doc.meta keys cannot be longer then 50 characters')
+    if (key.length > 32) {
+      throw new Error('doc.meta keys cannot be longer then 32 characters')
     }
   })
 }
