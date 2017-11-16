@@ -1,3 +1,5 @@
+declare function emit(val: any): any
+
 /// <reference types="pouchdb-core" />
 // tslint:disable-next-line:no-namespace
 declare namespace PouchDB {
