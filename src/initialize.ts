@@ -44,9 +44,51 @@ export class Initialize {
         return db
     }
 
-    public customIndex(db: PouchDB.Database) {
+    /**
+     * Setting DB here to any otherwise our customIndex will be rejected for not matching the PutDocument type.
+     */
+    public customIndex(db: any) {
+        declare function emit(val: any): any
+
+        const didsMap = (doc: any) => {
+            if (doc.type === 'did') {
+                emit(doc.type)
+            }
+        }
+
+        const sourcesMap = (doc: any) => {
+            if (doc.type === 'did' && doc.source) {
+                emit(doc.source)
+            }
+        }
+
+        const tagsMap = (doc: any) => {
+            if (doc.type === 'did' && doc.tags) {
+                doc.tags.forEach( (tag: any) => {
+                    emit(tag)
+                })
+            }
+        }
+
+        const customIndex = {
+            _id: '_design/my_index',
+            views: {
+                dids: {
+                    map: didsMap.toString(),
+                    reduce: '_count'
+                },
+                sources: {
+                    map: sourcesMap.toString(),
+                    reduce: '_count'
+                },
+                tags: {
+                    map: tagsMap.toString(),
+                    reduce: '_count'
+                },
+            }
+        }
+
         // save the index
-        const customIndex = require('./helpers/customIndex')
         db.put(customIndex).then(() => {
             // run each query to create an index.
             db.query('my_index/tags', {limit: 0, reduce: true, group: true})
