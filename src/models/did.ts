@@ -211,6 +211,23 @@ export class Did {
     */
 
     /**
+     * Hydrates the model from the raw database document.
+     */
+    public hydrate(input: any) {
+        this.id = input._id
+        this.data._id  = input._id
+        this.data._rev = input._rev
+        this.data.date = moment(input.date)
+        this.data.user = input.user
+        this.data.source = input.source
+        this.data.type = input.type
+
+        this.setText(input.text)
+        this.setTags(input.tags)
+        this.setMeta(input.meta)
+    }
+
+    /**
      * Prepare the model for an insert
      */
     private prepForInsert() {
@@ -232,23 +249,6 @@ export class Did {
         this.data.date   = oldDid.data.date.toJSON()
         this.data.source = oldDid.data.source
         validate(this.data, oldDid.data)
-    }
-
-    /**
-     * Hydrates the model from the raw database document.
-     */
-    private hydrate(input: any) {
-        this.id = input._id
-        this.data._id  = input._id
-        this.data._rev = input._rev
-        this.data.date = moment(input.date)
-        this.data.user = input.user
-        this.data.source = input.source
-        this.data.type = input.type
-
-        this.setText(input.text)
-        this.setTags(input.tags)
-        this.setMeta(input.meta)
     }
 
 }

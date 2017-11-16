@@ -5,38 +5,50 @@ import PouchDB from 'pouchdb'
  */
 export class Tags {
 
-  /**
-   *
-   */
-  private db: PouchDB.Database
+    /**
+     *
+     */
+    private db: PouchDB.Database
 
-  /**
-   *
-   */
-  private data: string[]
+    /**
+     *
+     */
+    private data: string[]
 
-  /**
-   *
-   */
-  constructor(db: PouchDB.Database) {
-    this.db   = db
-  }
+    /**
+     *
+     */
+    constructor(db: PouchDB.Database) {
+        this.db   = db
+    }
 
-  /*
-  |--------------------------------------------------------------------------
-  | Methods
-  |--------------------------------------------------------------------------
-  |
-  |
-  */
+    /*
+    |--------------------------------------------------------------------------
+    | Methods
+    |--------------------------------------------------------------------------
+    |
+    |
+    */
 
-  public get(): Promise<PouchDB.Query.Response<{}>> {
-    return (async () => {
-      try {
-        return await this.db.query('my_index/tags', {reduce: true, group: true})
-      } catch (err) {
-        throw (err)
-      }
-    })()
-  }
+    /**
+     * Gets all tags from the database along with their number of occurrences.
+     */
+    public async get(): Promise<any> {
+        try {
+
+            // Get all tags and counts tags from our tags index
+            const result = await this.db.query('my_index/tags', {
+                group: true, reduce: true
+            })
+
+            interface I {value: string, key: string}
+            const rows = result.rows
+
+            // convert array of key:value objects to a flat object
+            return Object.assign({}, ...rows.map((d: I) => ({[d.key]: d.value})))
+        } catch (err) {
+            console.log(err)
+            throw (err)
+        }
+    }
 }
