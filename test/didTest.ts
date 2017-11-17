@@ -20,10 +20,18 @@ test('testGettersAndSetters', async (t) => {
   const did = await t.context.factory.did()
   did.setText('test')
   did.setTags(['test', 'Schöner Titel läßt grüßen!? Bel été !'])
-  did.setMeta('test')
+
+  // test that meta values will be properly cast to integers
+  did.setMeta({a: '50', b: '50 feet', c: 'fifty', d: 50, e: true})
   t.is(did.getTags()[0], 'test')
   t.is(did.getTags()[1], 'schoener-titel-laesst-gruessen')
-  t.is(did.getMeta(), 'test')
+  t.deepEqual(did.getMeta(), {
+      a: 50,
+      b: '50 feet',
+      c: 'fifty',
+      d: 50,
+      e: true
+     })
   t.is(did.getText(), 'test')
 })
 

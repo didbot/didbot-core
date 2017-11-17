@@ -140,7 +140,22 @@ export class Did {
     /**
      * @param meta object
      */
-    public setMeta(meta: object) {
+    public setMeta(meta: any) {
+        if (typeof meta !== 'object') { throw new Error('Meta must be an object') }
+
+        Object.keys(meta).forEach( (key) => {
+            const val: any = meta[key]
+
+            // return early if val is not a string
+            if (typeof val !== 'string') { return }
+
+            const num: any = +(val)
+
+            if (!Number.isNaN(num)) {
+                meta[key] = +(val)
+            }
+        })
+
         this.data.meta = meta
     }
 

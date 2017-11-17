@@ -48,7 +48,6 @@ export class Initialize {
      * Setting DB here to any otherwise our customIndex will be rejected for not matching the PutDocument type.
      */
     public customIndex(db: any) {
-        declare function emit(val: any): any
 
         const didsMap = (doc: any) => {
             if (doc.type === 'did') {
