@@ -160,6 +160,33 @@ test('testSourceFilter', async (t) => {
     t.is(d.data.length, 3)
 })
 
+test('testFilterReset', async (t) => {
+    await t.context.factory.dids(3)
+    const d = new Dids(t.context.user)
+    await d.get()
+    t.is(d.data.length, 3)
+
+    // need to set dates directly on the db
+    const d1 = await t.context.db.get(d.data[0].id)
+
+    d1.source = 'sweet-sauce'
+    d1.text = 'pineapple'
+    d1.tags = ['you-re-it']
+
+    await t.context.db.put(d1)
+
+    d.filter.source = 'sweet-sauce'
+    d.filter.q = 'pineapple'
+    d.filter.tag = 'you-re-it'
+    await d.get()
+    t.is(d.data.length, 1)
+
+    // reset and verify we have 3 dids again
+    d.filter.reset()
+    await d.get()
+    t.is(d.data.length, 3)
+})
+
 /*
 |--------------------------------------------------------------------------
 | Summary Tests
