@@ -8,7 +8,12 @@ export class PouchFactoryNode {
         PouchDB.plugin(require('pouchdb-quick-search'))
         PouchDB.plugin(require('pouchdb-authentication'))
 
-        return new PouchDB('db/' + userId)
+        // TODO: is there a better way to handle this?
+        if (__dirname.includes('didbot-core/dist') ) {
+            return new PouchDB(__dirname + '/../../../db/' + userId) // running as js
+        } else {
+            return new PouchDB(__dirname + '/../../db/' + userId) // ts
+        }
     }
 
 }

@@ -1,5 +1,6 @@
 .env
 .idea
-db
+.nyc_output
+coverage
 node_modules
 dist

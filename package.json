@@ -2,11 +2,36 @@
   "name": "didbot-core",
   "description": "",
   "version": "0.0.2",
-  "main": "./src/index.ts",
+  "main": "./dist/src/index.js",
   "author": "",
   "license": "MIT",
   "scripts": {
-    "test": "ava-ts"
+    "test": "ava-ts",
+    "postinstall": "node_modules/typescript/bin/tsc"
+  },
+  "nyc": {
+    "check-coverage": true,
+    "all": true,
+    "extension": [
+      ".js",
+      ".ts"
+    ],
+    "require": [
+      "ts-node/register"
+    ],
+    "include": [
+      "src/**/!(*.test.*).[tj]s?(x)"
+    ],
+    "exclude": [
+      "**/*.d.ts",
+      "customIndex.js"
+    ],
+    "reporter": [
+      "html",
+      "lcov",
+      "text",
+      "text-summary"
+    ]
   },
   "devDependencies": {
     "@types/node": "^8.0.50",
@@ -23,6 +48,7 @@
     "eslint-plugin-standard": "^3.0.1",
     "faker": "^4.1.0",
     "fs-extra": "^4.0.2",
+    "nyc": "^11.3.0",
     "ts-node": "^3.3.0",
     "tslint": "^5.8.0",
     "typescript": "^2.6.1",
